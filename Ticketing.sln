@@ -3,7 +3,37 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34714.143
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ticketing.Api", "Ticketing.Api\Ticketing.Api.csproj", "{8249AB00-1821-43CC-B5D7-CE0109303071}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ticketing.Application", "Ticketing.Application\Ticketing.Application.csproj", "{0FDC9B87-7A1B-4375-838F-44C00FF00059}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ticketing.Domain", "Ticketing.Domain\Ticketing.Domain.csproj", "{C56FE4A2-826B-4A78-892E-6A50F601AF39}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ticketing.Infrastructure", "Ticketing.Infrastructure\Ticketing.Infrastructure.csproj", "{D34696FF-2CF9-46FA-A5F8-E4C220C9DA26}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8249AB00-1821-43CC-B5D7-CE0109303071}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8249AB00-1821-43CC-B5D7-CE0109303071}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8249AB00-1821-43CC-B5D7-CE0109303071}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8249AB00-1821-43CC-B5D7-CE0109303071}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FDC9B87-7A1B-4375-838F-44C00FF00059}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FDC9B87-7A1B-4375-838F-44C00FF00059}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FDC9B87-7A1B-4375-838F-44C00FF00059}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FDC9B87-7A1B-4375-838F-44C00FF00059}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C56FE4A2-826B-4A78-892E-6A50F601AF39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C56FE4A2-826B-4A78-892E-6A50F601AF39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C56FE4A2-826B-4A78-892E-6A50F601AF39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C56FE4A2-826B-4A78-892E-6A50F601AF39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D34696FF-2CF9-46FA-A5F8-E4C220C9DA26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D34696FF-2CF9-46FA-A5F8-E4C220C9DA26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D34696FF-2CF9-46FA-A5F8-E4C220C9DA26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D34696FF-2CF9-46FA-A5F8-E4C220C9DA26}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
