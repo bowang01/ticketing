@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
+using Ticketing.Api.GraphQL;
+using Ticketing.Api.Middleware;
 using Ticketing.Application;
 using Ticketing.Infrastructure;
 using Ticketing.Infrastructure.Persistence;
@@ -28,8 +30,17 @@ builder.Services.AddApplication();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//add graphQL(hot chocolate)
+/*builder.Services
+    .AddGraphQLServer()
+    .AddQueryType<Query>()
+    .AddErrorFilter<GraphQlErrorFilter>();*/
 
 var app = builder.Build();
+
+//add exception middleware
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+//app.MapGraphQL("/graphql");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

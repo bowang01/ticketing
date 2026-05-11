@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Ticketing.Application.Exceptions;
 using Ticketing.Infrastructure.Persistence;
 
 namespace Ticketing.Api.Controllers
@@ -40,6 +41,7 @@ namespace Ticketing.Api.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
         public async Task<IActionResult> Ping(CancellationToken cancellationToken)
         {
+            //throw new BusinessException("test","500");
             bool ok = await _ticketingDbContext.Database.CanConnectAsync(cancellationToken);
             if (!ok) 
             {
