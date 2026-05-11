@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.CompilerServices;
+using Ticketing.Application;
+using Ticketing.Infrastructure;
 using Ticketing.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,14 +20,14 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
-
 builder.Services.AddControllers();
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<TicketingDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Ticketing")));
 
 var app = builder.Build();
 
