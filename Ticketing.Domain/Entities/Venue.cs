@@ -1,29 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ticketing.Infrastructure.Persistence.Entities;
+namespace Ticketing.Domain.Entities;
 
-public partial class Venue
+[Table("Venues")]
+public sealed class Venue
 {
+    [Key]
     public Guid Id { get; set; }
 
     public Guid TenantId { get; set; }
 
-    public string Name { get; set; } = null!;
+    [Required, MaxLength(200)]
+    public string Name { get; set; } = string.Empty;
 
+    [MaxLength(500)]
     public string? AddressLine { get; set; }
 
+    [MaxLength(100)]
     public string? City { get; set; }
 
+    [MaxLength(2)]
     public string? CountryCode { get; set; }
+
+    public byte Status { get; set; }
 
     public DateTime CreatedAtUtc { get; set; }
 
-    public byte[] RowVersion { get; set; } = null!;
+    public DateTime? UpdatedAtUtc { get; set; }
 
-    public virtual ICollection<SeatMap> SeatMaps { get; set; } = new List<SeatMap>();
-
-    public virtual ICollection<Show> Shows { get; set; } = new List<Show>();
-
-    public virtual Tenant Tenant { get; set; } = null!;
+    [Timestamp]
+    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 }

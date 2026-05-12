@@ -1,13 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
-namespace Ticketing.Infrastructure.Persistence.Entities;
+namespace Ticketing.Domain.Entities;
 
-public partial class IdempotencyKey
+[Table("IdempotencyKeys")]
+[PrimaryKey(nameof(KeyHash), nameof(Scope))]
+public sealed class IdempotencyKey
 {
-    public string KeyHash { get; set; } = null!;
+    [MaxLength(64)]
+    public string KeyHash { get; set; } = string.Empty;
 
-    public string Scope { get; set; } = null!;
+    [MaxLength(64)]
+    public string Scope { get; set; } = string.Empty;
 
     public string? ResponseJson { get; set; }
 

@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ticketing.Infrastructure.Persistence.Entities;
+namespace Ticketing.Domain.Entities;
 
-public partial class Role
+[Table("Roles")]
+public sealed class Role
 {
+    [Key]
     public int Id { get; set; }
 
-    public string Name { get; set; } = null!;
-
-    public virtual ICollection<UserTenantMembership> UserTenantMemberships { get; set; } = new List<UserTenantMembership>();
-
-    public virtual ICollection<User> Users { get; set; } = new List<User>();
+    [Required, MaxLength(64)]
+    public string Name { get; set; } = string.Empty;
 }

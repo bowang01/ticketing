@@ -1,25 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ticketing.Infrastructure.Persistence.Entities;
+namespace Ticketing.Domain.Entities;
 
-public partial class SalesOrderLine
+[Table("SalesOrderLines")]
+public sealed class SalesOrderLine
 {
+    [Key]
     public Guid Id { get; set; }
 
     public Guid SalesOrderId { get; set; }
 
     public Guid ShowSeatId { get; set; }
 
+    [Column(TypeName = "decimal(12,2)")]
     public decimal UnitPrice { get; set; }
 
+    [MaxLength(200)]
     public string? DisplayName { get; set; }
 
-    public virtual SalesOrder SalesOrder { get; set; } = null!;
-
-    public virtual ShowSeat ShowSeat { get; set; } = null!;
-
-    public virtual ICollection<ShowSeat> ShowSeats { get; set; } = new List<ShowSeat>();
-
-    public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
+    public DateTime CreatedAtUtc { get; set; }
 }

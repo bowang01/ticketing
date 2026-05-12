@@ -1,27 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ticketing.Infrastructure.Persistence.Entities;
+namespace Ticketing.Domain.Entities;
 
-public partial class User
+[Table("Users")]
+public sealed class User
 {
+    [Key]
     public Guid Id { get; set; }
 
-    public string Email { get; set; } = null!;
+    [Required, MaxLength(256)]
+    public string Email { get; set; } = string.Empty;
 
-    public string EmailNormalized { get; set; } = null!;
+    [Required, MaxLength(256)]
+    public string EmailNormalized { get; set; } = string.Empty;
 
+    [MaxLength(200)]
     public string? DisplayName { get; set; }
 
     public string? PasswordHash { get; set; }
 
-    public bool IsActive { get; set; }
+    public byte Status { get; set; }
 
     public DateTime CreatedAtUtc { get; set; }
 
-    public virtual ICollection<SalesOrder> SalesOrders { get; set; } = new List<SalesOrder>();
-
-    public virtual ICollection<UserTenantMembership> UserTenantMemberships { get; set; } = new List<UserTenantMembership>();
-
-    public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
+    public DateTime? UpdatedAtUtc { get; set; }
 }

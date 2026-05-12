@@ -1,14 +1,13 @@
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ticketing.Domain.Entities;
 
-[Table("ShowSeatMaps")]
-[PrimaryKey(nameof(ShowId))]
-public sealed class ShowSeatMap
+[Table("ShowPriceTiers")]
+[PrimaryKey(nameof(ShowId), nameof(PriceTierId))]
+public sealed class ShowPriceTier
 {
     public Guid ShowId { get; set; }
 
-    public Guid SeatMapId { get; set; }
+    public Guid PriceTierId { get; set; }
 }

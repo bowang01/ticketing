@@ -1,17 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ticketing.Infrastructure.Persistence.Entities;
+namespace Ticketing.Domain.Entities;
 
-public partial class OutboxMessage
+[Table("OutboxMessages")]
+public sealed class OutboxMessage
 {
+    [Key]
     public Guid Id { get; set; }
 
     public Guid? TenantId { get; set; }
 
-    public string EventType { get; set; } = null!;
+    [Required, MaxLength(200)]
+    public string EventType { get; set; } = string.Empty;
 
-    public string PayloadJson { get; set; } = null!;
+    [Required]
+    public string PayloadJson { get; set; } = string.Empty;
+
+    public byte Status { get; set; }
 
     public DateTime CreatedAtUtc { get; set; }
 

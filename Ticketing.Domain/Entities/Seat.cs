@@ -1,25 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ticketing.Infrastructure.Persistence.Entities;
+namespace Ticketing.Domain.Entities;
 
-public partial class Seat
+[Table("Seats")]
+public sealed class Seat
 {
+    [Key]
     public Guid Id { get; set; }
 
     public Guid SeatMapId { get; set; }
 
+    [MaxLength(100)]
     public string? Section { get; set; }
 
-    public string RowLabel { get; set; } = null!;
+    [Required, MaxLength(20)]
+    public string RowLabel { get; set; } = string.Empty;
 
-    public string NumberLabel { get; set; } = null!;
+    [Required, MaxLength(20)]
+    public string NumberLabel { get; set; } = string.Empty;
 
     public byte SeatKind { get; set; }
-
-    public virtual SeatMap SeatMap { get; set; } = null!;
-
-    public virtual ICollection<ShowSeat> ShowSeats { get; set; } = new List<ShowSeat>();
-
-    public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }

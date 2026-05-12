@@ -1,43 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ticketing.Infrastructure.Persistence.Entities;
+namespace Ticketing.Domain.Entities;
 
-public partial class SalesOrder
+[Table("SalesOrders")]
+public sealed class SalesOrder
 {
+    [Key]
     public Guid Id { get; set; }
 
     public Guid TenantId { get; set; }
 
-    public string OrderNumber { get; set; } = null!;
+    [Required, MaxLength(40)]
+    public string OrderNumber { get; set; } = string.Empty;
 
     public Guid? UserId { get; set; }
 
+    [MaxLength(256)]
     public string? GuestEmail { get; set; }
 
+    [MaxLength(200)]
     public string? GuestName { get; set; }
 
     public byte Status { get; set; }
 
-    public string Currency { get; set; } = null!;
+    [Required, MaxLength(3)]
+    public string Currency { get; set; } = "NZD";
 
+    [Column(TypeName = "decimal(12,2)")]
     public decimal TotalAmount { get; set; }
 
     public DateTime? LockExpiresAtUtc { get; set; }
 
     public DateTime CreatedAtUtc { get; set; }
 
+    public DateTime? UpdatedAtUtc { get; set; }
+
     public DateTime? PaidAtUtc { get; set; }
 
-    public byte[] RowVersion { get; set; } = null!;
-
-    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
-
-    public virtual ICollection<Refund> Refunds { get; set; } = new List<Refund>();
-
-    public virtual ICollection<SalesOrderLine> SalesOrderLines { get; set; } = new List<SalesOrderLine>();
-
-    public virtual Tenant Tenant { get; set; } = null!;
-
-    public virtual User? User { get; set; }
+    [Timestamp]
+    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 }

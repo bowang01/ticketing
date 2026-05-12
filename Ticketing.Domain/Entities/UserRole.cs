@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ticketing.Domain.Entities;
 
-[Table("ShowSeatMaps")]
-[PrimaryKey(nameof(ShowId))]
-public sealed class ShowSeatMap
+[Table("UserRoles")]
+[PrimaryKey(nameof(UserId), nameof(RoleId))]
+public sealed class UserRole
 {
-    public Guid ShowId { get; set; }
+    public Guid UserId { get; set; }
 
-    public Guid SeatMapId { get; set; }
+    public int RoleId { get; set; }
 }

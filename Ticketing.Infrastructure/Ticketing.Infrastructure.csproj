@@ -27,4 +27,8 @@
     <ProjectReference Include="..\Ticketing.Domain\Ticketing.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Persistence\" />
+  </ItemGroup>
+
 </Project>

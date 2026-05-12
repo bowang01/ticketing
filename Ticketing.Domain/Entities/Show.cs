@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ticketing.Infrastructure.Persistence.Entities;
+namespace Ticketing.Domain.Entities;
 
-public partial class Show
+[Table("Shows")]
+public sealed class Show
 {
+    [Key]
     public Guid Id { get; set; }
 
     public Guid TenantId { get; set; }
@@ -25,19 +27,8 @@ public partial class Show
 
     public DateTime CreatedAtUtc { get; set; }
 
-    public byte[] RowVersion { get; set; } = null!;
+    public DateTime? UpdatedAtUtc { get; set; }
 
-    public virtual Event Event { get; set; } = null!;
-
-    public virtual ShowSeatMap? ShowSeatMap { get; set; }
-
-    public virtual ICollection<ShowSeat> ShowSeats { get; set; } = new List<ShowSeat>();
-
-    public virtual Tenant Tenant { get; set; } = null!;
-
-    public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
-
-    public virtual Venue Venue { get; set; } = null!;
-
-    public virtual ICollection<PriceTier> PriceTiers { get; set; } = new List<PriceTier>();
+    [Timestamp]
+    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 }

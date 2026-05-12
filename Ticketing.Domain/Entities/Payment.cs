@@ -1,18 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ticketing.Infrastructure.Persistence.Entities;
+namespace Ticketing.Domain.Entities;
 
-public partial class Payment
+[Table("Payments")]
+public sealed class Payment
 {
+    [Key]
     public Guid Id { get; set; }
 
     public Guid SalesOrderId { get; set; }
 
-    public string Provider { get; set; } = null!;
+    [Required, MaxLength(64)]
+    public string Provider { get; set; } = string.Empty;
 
+    [MaxLength(200)]
     public string? ExternalId { get; set; }
 
+    [Column(TypeName = "decimal(12,2)")]
     public decimal Amount { get; set; }
 
     public byte Status { get; set; }
@@ -21,5 +26,5 @@ public partial class Payment
 
     public DateTime CreatedAtUtc { get; set; }
 
-    public virtual SalesOrder SalesOrder { get; set; } = null!;
+    public DateTime? UpdatedAtUtc { get; set; }
 }

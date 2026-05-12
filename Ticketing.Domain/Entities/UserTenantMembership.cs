@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ticketing.Infrastructure.Persistence.Entities;
+namespace Ticketing.Domain.Entities;
 
-public partial class UserTenantMembership
+[Table("UserTenantMemberships")]
+public sealed class UserTenantMembership
 {
+    [Key]
     public Guid Id { get; set; }
 
     public Guid UserId { get; set; }
@@ -13,13 +15,9 @@ public partial class UserTenantMembership
 
     public int RoleId { get; set; }
 
-    public bool IsActive { get; set; }
+    public byte Status { get; set; }
 
     public DateTime CreatedAtUtc { get; set; }
 
-    public virtual Role Role { get; set; } = null!;
-
-    public virtual Tenant Tenant { get; set; } = null!;
-
-    public virtual User User { get; set; } = null!;
+    public DateTime? UpdatedAtUtc { get; set; }
 }

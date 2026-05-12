@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ticketing.Infrastructure.Persistence.Entities;
+namespace Ticketing.Domain.Entities;
 
-public partial class ShowSeat
+[Table("ShowSeats")]
+public sealed class ShowSeat
 {
+    [Key]
     public Guid Id { get; set; }
 
     public Guid ShowId { get; set; }
@@ -21,15 +23,10 @@ public partial class ShowSeat
 
     public Guid? SalesOrderLineId { get; set; }
 
-    public byte[] RowVersion { get; set; } = null!;
+    public DateTime CreatedAtUtc { get; set; }
 
-    public virtual PriceTier PriceTier { get; set; } = null!;
+    public DateTime? UpdatedAtUtc { get; set; }
 
-    public virtual SalesOrderLine? SalesOrderLine { get; set; }
-
-    public virtual ICollection<SalesOrderLine> SalesOrderLines { get; set; } = new List<SalesOrderLine>();
-
-    public virtual Seat Seat { get; set; } = null!;
-
-    public virtual Show Show { get; set; } = null!;
+    [Timestamp]
+    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 }

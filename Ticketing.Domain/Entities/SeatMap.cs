@@ -1,27 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ticketing.Infrastructure.Persistence.Entities;
+namespace Ticketing.Domain.Entities;
 
-public partial class SeatMap
+[Table("SeatMaps")]
+public sealed class SeatMap
 {
+    [Key]
     public Guid Id { get; set; }
 
     public Guid TenantId { get; set; }
 
     public Guid VenueId { get; set; }
 
-    public string Name { get; set; } = null!;
+    [Required, MaxLength(200)]
+    public string Name { get; set; } = string.Empty;
 
     public string? LayoutJson { get; set; }
 
+    public byte Status { get; set; }
+
     public DateTime CreatedAtUtc { get; set; }
 
-    public virtual ICollection<Seat> Seats { get; set; } = new List<Seat>();
-
-    public virtual ICollection<ShowSeatMap> ShowSeatMaps { get; set; } = new List<ShowSeatMap>();
-
-    public virtual Tenant Tenant { get; set; } = null!;
-
-    public virtual Venue Venue { get; set; } = null!;
+    public DateTime? UpdatedAtUtc { get; set; }
 }

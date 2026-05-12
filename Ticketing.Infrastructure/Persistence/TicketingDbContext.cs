@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using Ticketing.Infrastructure.Persistence.Entities;
+using Ticketing.Domain.Entities;
 
 namespace Ticketing.Infrastructure.Persistence;
 
@@ -36,6 +36,8 @@ public partial class TicketingDbContext : DbContext
 
     public virtual DbSet<Show> Shows { get; set; }
 
+    public virtual DbSet<ShowPriceTier> ShowPriceTiers { get; set; }
+
     public virtual DbSet<ShowSeat> ShowSeats { get; set; }
 
     public virtual DbSet<ShowSeatMap> ShowSeatMaps { get; set; }
@@ -45,6 +47,8 @@ public partial class TicketingDbContext : DbContext
     public virtual DbSet<Ticket> Tickets { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+
+    public virtual DbSet<UserRole> UserRoles { get; set; }
 
     public virtual DbSet<UserTenantMembership> UserTenantMemberships { get; set; }
 
@@ -65,11 +69,7 @@ public partial class TicketingDbContext : DbContext
                 .IsConcurrencyToken();
             entity.Property(e => e.Subtitle).HasMaxLength(300);
             entity.Property(e => e.Title).HasMaxLength(300);
-
-            entity.HasOne(d => d.Tenant).WithMany(p => p.Events)
-                .HasForeignKey(d => d.TenantId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Events_Tenants");
+            entity.Property(e => e.UpdatedAtUtc).HasPrecision(3);
         });
 
         modelBuilder.Entity<IdempotencyKey>(entity =>
@@ -91,7 +91,7 @@ public partial class TicketingDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK_Outbox");
 
-            entity.HasIndex(e => new { e.ProcessedAtUtc, e.CreatedAtUtc }, "IX_Outbox_Unprocessed").HasFilter("([ProcessedAtUtc] IS NULL)");
+            entity.HasIndex(e => new { e.Status, e.ProcessedAtUtc, e.CreatedAtUtc }, "IX_Outbox_Unprocessed").HasFilter("([Status]=(0))");
 
             entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.CreatedAtUtc)
@@ -116,11 +116,7 @@ public partial class TicketingDbContext : DbContext
                 .HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.ExternalId).HasMaxLength(200);
             entity.Property(e => e.Provider).HasMaxLength(64);
-
-            entity.HasOne(d => d.SalesOrder).WithMany(p => p.Payments)
-                .HasForeignKey(d => d.SalesOrderId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Payments_Orders");
+            entity.Property(e => e.UpdatedAtUtc).HasPrecision(3);
         });
 
         modelBuilder.Entity<PriceTier>(entity =>
@@ -136,26 +132,21 @@ public partial class TicketingDbContext : DbContext
                 .HasDefaultValue("NZD")
                 .IsFixedLength();
             entity.Property(e => e.Name).HasMaxLength(120);
-
-            entity.HasOne(d => d.Tenant).WithMany(p => p.PriceTiers)
-                .HasForeignKey(d => d.TenantId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PriceTiers_Tenants");
+            entity.Property(e => e.Status).HasDefaultValue((byte)1);
+            entity.Property(e => e.UpdatedAtUtc).HasPrecision(3);
         });
 
         modelBuilder.Entity<Refund>(entity =>
         {
+            entity.HasIndex(e => e.SalesOrderId, "IX_Refunds_Order");
+
             entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.Amount).HasColumnType("decimal(12, 2)");
             entity.Property(e => e.CreatedAtUtc)
                 .HasPrecision(3)
                 .HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Reason).HasMaxLength(500);
-
-            entity.HasOne(d => d.SalesOrder).WithMany(p => p.Refunds)
-                .HasForeignKey(d => d.SalesOrderId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Refunds_Orders");
+            entity.Property(e => e.UpdatedAtUtc).HasPrecision(3);
         });
 
         modelBuilder.Entity<Role>(entity =>
@@ -192,33 +183,21 @@ public partial class TicketingDbContext : DbContext
                 .IsRowVersion()
                 .IsConcurrencyToken();
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(12, 2)");
-
-            entity.HasOne(d => d.Tenant).WithMany(p => p.SalesOrders)
-                .HasForeignKey(d => d.TenantId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_SO_Tenants");
-
-            entity.HasOne(d => d.User).WithMany(p => p.SalesOrders)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK_SO_Users");
+            entity.Property(e => e.UpdatedAtUtc).HasPrecision(3);
         });
 
         modelBuilder.Entity<SalesOrderLine>(entity =>
         {
             entity.HasIndex(e => e.SalesOrderId, "IX_SOL_Order");
 
+            entity.HasIndex(e => e.ShowSeatId, "IX_SOL_ShowSeat");
+
             entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.CreatedAtUtc)
+                .HasPrecision(3)
+                .HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.DisplayName).HasMaxLength(200);
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(12, 2)");
-
-            entity.HasOne(d => d.SalesOrder).WithMany(p => p.SalesOrderLines)
-                .HasForeignKey(d => d.SalesOrderId)
-                .HasConstraintName("FK_SOL_Orders");
-
-            entity.HasOne(d => d.ShowSeat).WithMany(p => p.SalesOrderLines)
-                .HasForeignKey(d => d.ShowSeatId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_SOL_ShowSeats");
         });
 
         modelBuilder.Entity<Seat>(entity =>
@@ -231,10 +210,6 @@ public partial class TicketingDbContext : DbContext
             entity.Property(e => e.NumberLabel).HasMaxLength(20);
             entity.Property(e => e.RowLabel).HasMaxLength(20);
             entity.Property(e => e.Section).HasMaxLength(100);
-
-            entity.HasOne(d => d.SeatMap).WithMany(p => p.Seats)
-                .HasForeignKey(d => d.SeatMapId)
-                .HasConstraintName("FK_Seats_SeatMaps");
         });
 
         modelBuilder.Entity<SeatMap>(entity =>
@@ -246,16 +221,8 @@ public partial class TicketingDbContext : DbContext
                 .HasPrecision(3)
                 .HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Name).HasMaxLength(200);
-
-            entity.HasOne(d => d.Tenant).WithMany(p => p.SeatMaps)
-                .HasForeignKey(d => d.TenantId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_SeatMaps_Tenants");
-
-            entity.HasOne(d => d.Venue).WithMany(p => p.SeatMaps)
-                .HasForeignKey(d => d.VenueId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_SeatMaps_Venues");
+            entity.Property(e => e.Status).HasDefaultValue((byte)1);
+            entity.Property(e => e.UpdatedAtUtc).HasPrecision(3);
         });
 
         modelBuilder.Entity<Show>(entity =>
@@ -275,37 +242,14 @@ public partial class TicketingDbContext : DbContext
             entity.Property(e => e.SaleClosesAtUtc).HasPrecision(3);
             entity.Property(e => e.SaleOpensAtUtc).HasPrecision(3);
             entity.Property(e => e.StartsAtUtc).HasPrecision(3);
+            entity.Property(e => e.UpdatedAtUtc).HasPrecision(3);
+        });
 
-            entity.HasOne(d => d.Event).WithMany(p => p.Shows)
-                .HasForeignKey(d => d.EventId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Shows_Events");
+        modelBuilder.Entity<ShowPriceTier>(entity =>
+        {
+            entity.HasKey(e => new { e.ShowId, e.PriceTierId });
 
-            entity.HasOne(d => d.Tenant).WithMany(p => p.Shows)
-                .HasForeignKey(d => d.TenantId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Shows_Tenants");
-
-            entity.HasOne(d => d.Venue).WithMany(p => p.Shows)
-                .HasForeignKey(d => d.VenueId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Shows_Venues");
-
-            entity.HasMany(d => d.PriceTiers).WithMany(p => p.Shows)
-                .UsingEntity<Dictionary<string, object>>(
-                    "ShowPriceTier",
-                    r => r.HasOne<PriceTier>().WithMany()
-                        .HasForeignKey("PriceTierId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK_SPT_PriceTiers"),
-                    l => l.HasOne<Show>().WithMany()
-                        .HasForeignKey("ShowId")
-                        .HasConstraintName("FK_SPT_Shows"),
-                    j =>
-                    {
-                        j.HasKey("ShowId", "PriceTierId");
-                        j.ToTable("ShowPriceTiers");
-                    });
+            entity.HasIndex(e => e.PriceTierId, "IX_ShowPriceTiers_PriceTier");
         });
 
         modelBuilder.Entity<ShowSeat>(entity =>
@@ -317,45 +261,23 @@ public partial class TicketingDbContext : DbContext
             entity.HasIndex(e => new { e.ShowId, e.SeatId }, "UQ_ShowSeats_Show_Seat").IsUnique();
 
             entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.CreatedAtUtc)
+                .HasPrecision(3)
+                .HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.LockExpiresAtUtc).HasPrecision(3);
             entity.Property(e => e.RowVersion)
                 .IsRowVersion()
                 .IsConcurrencyToken();
-
-            entity.HasOne(d => d.PriceTier).WithMany(p => p.ShowSeats)
-                .HasForeignKey(d => d.PriceTierId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ShowSeats_PriceTiers");
-
-            entity.HasOne(d => d.SalesOrderLine).WithMany(p => p.ShowSeats)
-                .HasForeignKey(d => d.SalesOrderLineId)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK_ShowSeats_SalesOrderLines");
-
-            entity.HasOne(d => d.Seat).WithMany(p => p.ShowSeats)
-                .HasForeignKey(d => d.SeatId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ShowSeats_Seats");
-
-            entity.HasOne(d => d.Show).WithMany(p => p.ShowSeats)
-                .HasForeignKey(d => d.ShowId)
-                .HasConstraintName("FK_ShowSeats_Shows");
+            entity.Property(e => e.UpdatedAtUtc).HasPrecision(3);
         });
 
         modelBuilder.Entity<ShowSeatMap>(entity =>
         {
             entity.HasKey(e => e.ShowId);
 
+            entity.HasIndex(e => e.SeatMapId, "IX_ShowSeatMaps_SeatMap");
+
             entity.Property(e => e.ShowId).ValueGeneratedNever();
-
-            entity.HasOne(d => d.SeatMap).WithMany(p => p.ShowSeatMaps)
-                .HasForeignKey(d => d.SeatMapId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_SSM_SeatMaps");
-
-            entity.HasOne(d => d.Show).WithOne(p => p.ShowSeatMap)
-                .HasForeignKey<ShowSeatMap>(d => d.ShowId)
-                .HasConstraintName("FK_SSM_Shows");
         });
 
         modelBuilder.Entity<Tenant>(entity =>
@@ -366,13 +288,16 @@ public partial class TicketingDbContext : DbContext
             entity.Property(e => e.CreatedAtUtc)
                 .HasPrecision(3)
                 .HasDefaultValueSql("(sysutcdatetime())");
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Name).HasMaxLength(200);
             entity.Property(e => e.Slug).HasMaxLength(100);
+            entity.Property(e => e.Status).HasDefaultValue((byte)1);
+            entity.Property(e => e.UpdatedAtUtc).HasPrecision(3);
         });
 
         modelBuilder.Entity<Ticket>(entity =>
         {
+            entity.HasIndex(e => e.SalesOrderLineId, "IX_Tickets_SOL");
+
             entity.HasIndex(e => new { e.TenantId, e.ShowId }, "IX_Tickets_Tenant_Show");
 
             entity.HasIndex(e => e.TicketNumber, "UQ_Tickets_Number").IsUnique();
@@ -386,27 +311,8 @@ public partial class TicketingDbContext : DbContext
                 .IsRowVersion()
                 .IsConcurrencyToken();
             entity.Property(e => e.TicketNumber).HasMaxLength(40);
+            entity.Property(e => e.UpdatedAtUtc).HasPrecision(3);
             entity.Property(e => e.UsedAtUtc).HasPrecision(3);
-
-            entity.HasOne(d => d.SalesOrderLine).WithMany(p => p.Tickets)
-                .HasForeignKey(d => d.SalesOrderLineId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Tickets_SOL");
-
-            entity.HasOne(d => d.Seat).WithMany(p => p.Tickets)
-                .HasForeignKey(d => d.SeatId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Tickets_Seats");
-
-            entity.HasOne(d => d.Show).WithMany(p => p.Tickets)
-                .HasForeignKey(d => d.ShowId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Tickets_Shows");
-
-            entity.HasOne(d => d.Tenant).WithMany(p => p.Tickets)
-                .HasForeignKey(d => d.TenantId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Tickets_Tenants");
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -422,23 +328,17 @@ public partial class TicketingDbContext : DbContext
             entity.Property(e => e.DisplayName).HasMaxLength(200);
             entity.Property(e => e.Email).HasMaxLength(256);
             entity.Property(e => e.EmailNormalized).HasMaxLength(256);
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.Status).HasDefaultValue((byte)1);
+            entity.Property(e => e.UpdatedAtUtc).HasPrecision(3);
+        });
 
-            entity.HasMany(d => d.Roles).WithMany(p => p.Users)
-                .UsingEntity<Dictionary<string, object>>(
-                    "UserRole",
-                    r => r.HasOne<Role>().WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK_UserRoles_Roles"),
-                    l => l.HasOne<User>().WithMany()
-                        .HasForeignKey("UserId")
-                        .HasConstraintName("FK_UserRoles_Users"),
-                    j =>
-                    {
-                        j.HasKey("UserId", "RoleId");
-                        j.ToTable("UserRoles");
-                    });
+        modelBuilder.Entity<UserRole>(entity =>
+        {
+            entity.HasKey(e => new { e.UserId, e.RoleId });
+
+            entity.HasIndex(e => e.RoleId, "IX_UserRoles_Role");
+
+            entity.HasIndex(e => e.UserId, "IX_UserRoles_User");
         });
 
         modelBuilder.Entity<UserTenantMembership>(entity =>
@@ -451,21 +351,8 @@ public partial class TicketingDbContext : DbContext
             entity.Property(e => e.CreatedAtUtc)
                 .HasPrecision(3)
                 .HasDefaultValueSql("(sysutcdatetime())");
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
-
-            entity.HasOne(d => d.Role).WithMany(p => p.UserTenantMemberships)
-                .HasForeignKey(d => d.RoleId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UTM_Roles");
-
-            entity.HasOne(d => d.Tenant).WithMany(p => p.UserTenantMemberships)
-                .HasForeignKey(d => d.TenantId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UTM_Tenants");
-
-            entity.HasOne(d => d.User).WithMany(p => p.UserTenantMemberships)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK_UTM_Users");
+            entity.Property(e => e.Status).HasDefaultValue((byte)1);
+            entity.Property(e => e.UpdatedAtUtc).HasPrecision(3);
         });
 
         modelBuilder.Entity<Venue>(entity =>
@@ -486,11 +373,8 @@ public partial class TicketingDbContext : DbContext
             entity.Property(e => e.RowVersion)
                 .IsRowVersion()
                 .IsConcurrencyToken();
-
-            entity.HasOne(d => d.Tenant).WithMany(p => p.Venues)
-                .HasForeignKey(d => d.TenantId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Venues_Tenants");
+            entity.Property(e => e.Status).HasDefaultValue((byte)1);
+            entity.Property(e => e.UpdatedAtUtc).HasPrecision(3);
         });
 
         OnModelCreatingPartial(modelBuilder);

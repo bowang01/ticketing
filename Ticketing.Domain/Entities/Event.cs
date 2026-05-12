@@ -1,16 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ticketing.Infrastructure.Persistence.Entities;
+namespace Ticketing.Domain.Entities;
 
-public partial class Event
+[Table("Events")]
+public sealed class Event
 {
+    [Key]
     public Guid Id { get; set; }
 
     public Guid TenantId { get; set; }
 
-    public string Title { get; set; } = null!;
+    [Required, MaxLength(300)]
+    public string Title { get; set; } = string.Empty;
 
+    [MaxLength(300)]
     public string? Subtitle { get; set; }
 
     public string? Description { get; set; }
@@ -19,9 +23,8 @@ public partial class Event
 
     public DateTime CreatedAtUtc { get; set; }
 
-    public byte[] RowVersion { get; set; } = null!;
+    public DateTime? UpdatedAtUtc { get; set; }
 
-    public virtual ICollection<Show> Shows { get; set; } = new List<Show>();
-
-    public virtual Tenant Tenant { get; set; } = null!;
+    [Timestamp]
+    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 }

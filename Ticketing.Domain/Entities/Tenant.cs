@@ -1,33 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Ticketing.Infrastructure.Persistence.Entities;
+namespace Ticketing.Domain.Entities;
 
-public partial class Tenant
+[Table("Tenants")]
+public sealed class Tenant
 {
+    [Key]
     public Guid Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    [Required, MaxLength(200)]
+    public string Name { get; set; } = string.Empty;
 
-    public string Slug { get; set; } = null!;
+    [Required, MaxLength(100)]
+    public string Slug { get; set; } = string.Empty;
 
-    public bool IsActive { get; set; }
+    public byte Status { get; set; }
 
     public DateTime CreatedAtUtc { get; set; }
 
-    public virtual ICollection<Event> Events { get; set; } = new List<Event>();
-
-    public virtual ICollection<PriceTier> PriceTiers { get; set; } = new List<PriceTier>();
-
-    public virtual ICollection<SalesOrder> SalesOrders { get; set; } = new List<SalesOrder>();
-
-    public virtual ICollection<SeatMap> SeatMaps { get; set; } = new List<SeatMap>();
-
-    public virtual ICollection<Show> Shows { get; set; } = new List<Show>();
-
-    public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
-
-    public virtual ICollection<UserTenantMembership> UserTenantMemberships { get; set; } = new List<UserTenantMembership>();
-
-    public virtual ICollection<Venue> Venues { get; set; } = new List<Venue>();
+    public DateTime? UpdatedAtUtc { get; set; }
 }
